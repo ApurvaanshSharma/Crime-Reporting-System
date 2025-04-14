@@ -1,0 +1,96 @@
+@startuml Crime_Reporting_System
+
+' Abstract Person class
+abstract class Person {
+  # String name
+  + Person(String name)
+  + String getName()
+  + {abstract} String getRole()
+  + {abstract} String toString()
+}
+
+' Concrete Person subclasses
+class Citizen {
+  + Citizen(String name)
+  + String getRole()
+  + String toString()
+}
+
+class PoliceOfficer {
+  + PoliceOfficer(String name)
+  + String getRole()
+  + String toString()
+}
+
+' Crime Report class
+class CrimeReport {
+  - static int count
+  - int id
+  - String title
+  - String description
+  - String date
+  - Person reporter
+  + CrimeReport(String title, String description, String date, Person reporter)
+  + String toFileString()
+  + String toString()
+}
+
+' Database utility class
+class DatabaseUtil {
+  - static final String URL
+  - static final String USER
+  - static final String PASSWORD
+  + static Connection getConnection()
+  + static boolean testConnection()
+}
+
+' Data Access Object
+class Userdao {
+  + static Person login(String username, String password)
+  + static boolean registerUser(String name, String username, String password, String role)
+}
+
+' Crime System class
+class CrimeSystem {
+  - static final String FILE_NAME
+  - List<CrimeReport> reports
+  + CrimeSystem()
+  + void addReport(CrimeReport report)
+  + void viewReports()
+  + void saveReportToFile(CrimeReport report)
+  + void loadReports()
+  - CrimeReport parseReport(String line)
+}
+
+' Thread class for saving reports
+class ReportSaver {
+  - CrimeReport report
+  - CrimeSystem system
+  + ReportSaver(CrimeReport report, CrimeSystem system)
+  + void run()
+}
+
+' Main class
+class Main {
+  + static void main(String[] args)
+  - static Person performLogin(Scanner scanner)
+  - static void performRegistration(Scanner scanner)
+}
+
+' Relationships
+Person <|-- Citizen
+Person <|-- PoliceOfficer
+CrimeReport "1" *-- "1" Person : reporter
+ReportSaver "1" *-- "1" CrimeReport : report
+ReportSaver "1" *-- "1" CrimeSystem : system
+CrimeSystem "1" o-- "*" CrimeReport : reports
+Main ..> Person : uses
+Main ..> Userdao : uses
+Main ..> CrimeSystem : uses
+Main ..> ReportSaver : uses
+Userdao ..> DatabaseUtil : uses
+Userdao ..> Person : creates
+Userdao ..> Citizen : creates
+Userdao ..> PoliceOfficer : creates
+
+@enduml
